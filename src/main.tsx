@@ -26,7 +26,7 @@ const loadData = async () => {
 loadData()
     .then(({ timers, config }) => {
         if (Object.keys(timers).length == 0) {
-            timers[0] = {};
+            timers[new Date().getTime()] = { isPaused: true };
         }
         renderUI(timers, config);
     })
