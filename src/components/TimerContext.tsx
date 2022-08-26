@@ -22,6 +22,9 @@ const reducer = (state: Stopwatches, action: Action): Stopwatches => {
     switch (action.type) {
         case TimerActions.PAUSE:
             return keys.reduce((prev, key) => {
+                if (prev[key].isPaused) {
+                    return prev;
+                }
                 const { lastStartTime, lastElapsed } = prev[key];
                 const newElapsed =
                     lastStartTime !== undefined
@@ -40,8 +43,11 @@ const reducer = (state: Stopwatches, action: Action): Stopwatches => {
                 };
             }, state);
         case TimerActions.RESUME:
-            return keys.reduce(
-                (prev, key) => ({
+            return keys.reduce((prev, key) => {
+                if (!prev[key].isPaused) {
+                    return prev;
+                }
+                return {
                     ...prev,
                     [key]: {
                         ...prev[key],
@@ -51,9 +57,8 @@ const reducer = (state: Stopwatches, action: Action): Stopwatches => {
                             : prev[key].lastStartTime,
                         startingTime: prev[key].startingTime ?? new Date(),
                     },
-                }),
-                state
-            );
+                };
+            }, state);
         case TimerActions.RESET:
             return keys.reduce(
                 (prev, key) => ({
@@ -77,13 +82,16 @@ const reducer = (state: Stopwatches, action: Action): Stopwatches => {
                     startingTime: undefined,
                     lastStartTime: undefined,
                     lastElapsed: 0,
-                    ...state[key],
-                },
+                    ...action.payload,
+                } as Stopwatch,
             };
         case TimerActions.DELETE:
-            const newState = Object.assign({}, state);
-            keys.forEach((key) => delete newState[key]);
-            return newState;
+            return Object.keys(state).reduce((prev, key) => {
+                if (key !== action.key) {
+                    return { ...prev, [key]: state[key] };
+                }
+                return prev;
+            }, {});
         case TimerActions.SET_EXCLUSIVE:
             const runningTimers = keys.filter(
                 (key) => state[key].isPaused === false

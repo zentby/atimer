@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { useCallback, useContext } from "react";
 import TimerCard from "./TimerCard";
 import {
@@ -12,10 +12,14 @@ export const TimerStack = ({ exclusiveMode }: { exclusiveMode: boolean }) => {
     const { dispatch } = useContext(TimersDispatchContext);
     const onCardClick = useCallback(
         (key: string) => {
-            dispatch({ type: TimerActions.PAUSE });
-            dispatch({ type: TimerActions.RESUME, key });
+            if (!stopwatches[key].isPaused) {
+                dispatch({ type: TimerActions.PAUSE, key });
+            } else {
+                dispatch({ type: TimerActions.PAUSE });
+                dispatch({ type: TimerActions.RESUME, key });
+            }
         },
-        [dispatch]
+        [dispatch, stopwatches]
     );
     const onPlayOrPause = useCallback(
         (key: string) => {
@@ -40,27 +44,35 @@ export const TimerStack = ({ exclusiveMode }: { exclusiveMode: boolean }) => {
         [dispatch]
     );
     return (
-        <Stack
-            direction={{ xs: "column", sm: "row" }}
-            marginTop="30px"
-            flexWrap="wrap"
-        >
-            {Object.keys(stopwatches).map((key, index, array) => (
-                <TimerCard
-                    key={key}
-                    started={stopwatches[key].startingTime}
-                    id={key}
-                    isPaused={!!stopwatches[key].isPaused}
-                    lastStartTime={stopwatches[key].lastStartTime ?? new Date()}
-                    lastElapsed={stopwatches[key].lastElapsed ?? 0}
-                    onPlayOrPause={onPlayOrPause}
-                    onReset={onReset}
-                    onCardClick={onCardClick}
-                    showControls={!exclusiveMode}
-                    onDelete={onDelete}
-                    deletable={array.length > 1}
-                />
-            ))}
-        </Stack>
+        // <Stack
+        //     direction={{ xs: "column", sm: "row" }}
+        //     marginTop="30px"
+        //     flexWrap="wrap"
+        // >
+        <Grid container spacing={2}>
+            {Object.keys(stopwatches)
+                .sort()
+                .map((key, _, array) => (
+                    <Grid item sx={{ flexGrow: 1 }}>
+                        <TimerCard
+                            key={key}
+                            started={stopwatches[key].startingTime}
+                            id={key}
+                            isPaused={!!stopwatches[key].isPaused}
+                            lastStartTime={
+                                stopwatches[key].lastStartTime ?? new Date()
+                            }
+                            lastElapsed={stopwatches[key].lastElapsed ?? 0}
+                            onPlayOrPause={onPlayOrPause}
+                            onReset={onReset}
+                            onCardClick={onCardClick}
+                            showControls={!exclusiveMode}
+                            onDelete={onDelete}
+                            deletable={array.length > 1}
+                        />
+                    </Grid>
+                ))}
+        </Grid>
+        // </Stack>
     );
 };
