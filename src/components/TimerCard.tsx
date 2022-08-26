@@ -70,7 +70,7 @@ const TimerCard = ({
     }, [onCardClick, id]);
 
     return (
-        <Card sx={{ margin: "20px", minWidth: "340px" }}>
+        <Card sx={{ margin: "20px", minWidth: "300px" }}>
             <CardContent sx={{ paddingLeft: "20px", paddingRight: "20px" }}>
                 <Box
                     sx={{
